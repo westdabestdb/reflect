@@ -131,7 +131,14 @@ impl IUserRepository for UserRepository {
                         sha.input_str(user.password.as_str());
                         let hash_pw = sha.result_str();
                         let user_id = uuid::Uuid::new_v4().to_string();
-                        let _ex = db.collection(collection_name.as_str()).insert_one(doc! {"user_id": user_id.clone(), "fullname": user.fullname, "username": user.username, "email": user.email.clone(), "password": hash_pw}, None);
+                        let _ex = db.collection(collection_name.as_str()).insert_one(doc! {
+                            "user_id": user_id.clone(),
+                            "fullname": user.fullname,
+                            "username": user.username.clone(),
+                            "email": user.email.clone(),
+                            "password": hash_pw,
+                            "photo_url": format!("https://avatars.dicebear.com/4.5/api/bottts/{}.svg", user.username.to_owned()),
+                        }, None);
                         match _ex {
                             Ok(_) => {
                                 let _config: Config = Config {};

@@ -8,6 +8,7 @@ pub struct User {
     pub email: String,
     #[serde(skip)]
     pub password: String,
+    pub photo_url: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
