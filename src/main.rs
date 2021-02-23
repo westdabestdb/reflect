@@ -1,26 +1,21 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+mod api;
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
+use crate::api::index::index;
+use actix_web::{App, HttpServer, web};
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
 
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
-}
+// #[get("/")]
+// async fn hello() -> impl Responder {
+//     HttpResponse::Ok().body("welcome to the api v0.0.1")
+// }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
-        App::new()
-            .service(hello)
-            .service(echo)
-            .route("/hey", web::get().to(manual_hello))
+        App::new().service(
+            web::scope("/api")
+                .service(index)
+        )
     })
     .bind("127.0.0.1:3333")?
     .run()
