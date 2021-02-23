@@ -17,7 +17,7 @@ pub trait IUserRepository {
     fn find_user_with_username(&self, username: String) -> Result<Option<User>, Error>;
     fn login(&self, login: Login) -> Result<LoginResponse, Response>;
     fn register(&self, user: Register) -> Result<LoginResponse, Response>;
-    fn user_informations(&self, token: &str) -> Result<Option<User>, Response>;
+    fn me(&self, token: &str) -> Result<Option<User>, Response>;
     fn protected_function(&self) -> bool;
 }
 
@@ -168,7 +168,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    fn user_informations(&self, token: &str) -> Result<Option<User>, Response> {
+    fn me(&self, token: &str) -> Result<Option<User>, Response> {
         let _config: Config = Config {};
         let _var = _config.get_config_with_key("SECRET_KEY");
         let key = _var.as_bytes();

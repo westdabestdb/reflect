@@ -6,6 +6,7 @@ pub struct User {
     pub fullname: String,
     pub username: String,
     pub email: String,
+    #[serde(skip)]
     pub password: String,
 }
 
