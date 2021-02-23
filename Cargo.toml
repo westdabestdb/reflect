@@ -14,3 +14,11 @@ serde = { version = "1.0.123", features = ["derive"] }
 serde_json = "1.0.62"
 env_logger = "0.8.3"
 uuid = { version = "0.8", features = ["serde", "v4", "v5", "v3"] }
+mongodb = { version = "1.2.0", features = ["async-std-runtime", "sync"], default-features = false}
+lazy_static = "1.4.0"
+envfile = "0.2.1"
+jsonwebtoken = "7"
+futures = { version = "0.3", default-features = false }
+chrono = "0.4.19"
+rust-crypto = "0.2.36"
+bson = "1.2.0"

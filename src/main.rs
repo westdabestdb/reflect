@@ -1,11 +1,15 @@
-mod api;
-mod user_enum;
+#[macro_use]
+extern crate bson;
+extern crate mongodb;
 
-use crate::api::development::register;
-use crate::api::public::fields;
-use crate::api::public::index;
-use actix_web::{App, HttpServer, web};
+mod config;
+mod db;
+mod middlewares;
+mod models;
+mod repositories;
+
 use actix_web::middleware::Logger;
+use actix_web::{web, App, HttpServer};
 use env_logger::Env;
 
 #[actix_web::main]
@@ -15,16 +19,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
-            .service(
-                web::scope("/api")
-                    .service(index) // public api index
-                    .service(fields) // list of fields
-                    .service(
-                        web::scope("/dev")
-                            .service(index)
-                            .service(register)
-                    )
-            )
+            .service(web::scope("/api").configure(repositories::user_repository::init_routes))
     })
     .bind("127.0.0.1:3333")?
     .run()
