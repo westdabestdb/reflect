@@ -3,7 +3,7 @@ use crate::repositories::user_repository::{IUserRepository, UserRepository};
 use crate::db::db::{Connection, IConnection};
 use actix_web::{web, post, get, HttpResponse};
 use actix_web::http::StatusCode;
-use crate::models::user::{Register};
+use crate::models::user::{Register, Login};
 
 #[get("/")]
 async fn index() -> HttpResponse {
@@ -31,7 +31,17 @@ async fn register(user: web::Json<Register>) -> HttpResponse {
     HttpResponse::Ok().json(_repository.register(user.into_inner()))
 }
 
+#[post("/login")]
+async fn login(user: web::Json<Login>) -> HttpResponse {
+    let _connection: Connection = Connection {};
+    let _repository: UserRepository = UserRepository {
+        connection: _connection.init(),
+    };
+    HttpResponse::Ok().json(_repository.login(user.into_inner()))
+}
+
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
   cfg.service(index);
   cfg.service(register);
+  cfg.service(login);
 }

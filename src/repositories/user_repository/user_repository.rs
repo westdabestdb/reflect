@@ -1,10 +1,10 @@
 use crate::config::strings::{
-    EMAIL_EXIST, INVALID_TOKEN, REGISTRATION_FAIL, REGISTRATION_SUCCESS, SOMETHING_WRONG,
-    USERNAME_EXIST,
+    EMAIL_EXIST, INVALID_TOKEN, LOGIN_FAIL, LOGIN_SUCCESS, REGISTRATION_FAIL, REGISTRATION_SUCCESS,
+    SOMETHING_WRONG, USERNAME_EXIST,
 };
 use crate::config::{Config, IConfig};
 use crate::models::response::{LoginResponse, Response};
-use crate::models::user::{Claims, Register, User};
+use crate::models::user::{Claims, Login, Register, User};
 use chrono::{DateTime, Duration, Utc};
 use crypto::digest::Digest;
 use crypto::sha2::Sha256;
@@ -15,7 +15,7 @@ use mongodb::sync::Client;
 pub trait IUserRepository {
     fn find_user_with_email(&self, email: String) -> Result<Option<User>, Error>;
     fn find_user_with_username(&self, username: String) -> Result<Option<User>, Error>;
-    // fn login(&self, login: Login) -> Result<LoginResponse, Response>;
+    fn login(&self, login: Login) -> Result<LoginResponse, Response>;
     fn register(&self, user: Register) -> Result<LoginResponse, Response>;
     fn user_informations(&self, token: &str) -> Result<Option<User>, Response>;
     fn protected_function(&self) -> bool;
@@ -61,52 +61,47 @@ impl IUserRepository for UserRepository {
             None => Ok(None),
         }
     }
-    // fn login(&self, user: Login) -> Result<LoginResponse, Response> {
-    //     match self.find_user_with_email(user.email.to_string()).unwrap() {
-    //         Some(x) => {
-    //             let mut sha = Sha256::new();
-    //             sha.input_str(user.password.as_str());
-    //             if x.password == sha.result_str() {
-    //                 // JWT
-    // let _config: Config = Config {};
-    // let _var = _config.get_config_with_key("SECRET_KEY");
-    // let key = _var.as_bytes();
+    fn login(&self, user: Login) -> Result<LoginResponse, Response> {
+        match self.find_user_with_email(user.email.to_string()).unwrap() {
+            Some(x) => {
+                let mut sha = Sha256::new();
+                sha.input_str(user.password.as_str());
+                if x.password == sha.result_str() {
+                    let _config: Config = Config {};
+                    let _var = _config.get_config_with_key("SECRET_KEY");
+                    let key = _var.as_bytes();
 
-    // let mut _date: DateTime<Utc>;
-    // // Remember Me
-    // if !user.remember_me {
-    //     _date = Utc::now() + Duration::hours(1);
-    // } else {
-    //     _date = Utc::now() + Duration::days(365);
-    // }
-    // let my_claims = Claims {
-    //     sub: user.email,
-    //     exp: _date.timestamp() as usize,
-    // };
-    // let token = encode(
-    //     &Header::default(),
-    //     &my_claims,
-    //     &EncodingKey::from_secret(key),
-    // )
-    //     .unwrap();
-    // Ok(LoginResponse {
-    //     status: true,
-    //     token,
-    //     message: "You have successfully logged in.".to_string(),
-    // })
-    //             } else {
-    //                 Err(Response {
-    //                     status: false,
-    //                     message: "Check your user informations.".to_string(),
-    //                 })
-    //             }
-    //         }
-    //         None => Err(Response {
-    //             status: false,
-    //             message: "Check your user informations.".to_string(),
-    //         }),
-    //     }
-    // }
+                    let mut _date: DateTime<Utc>;
+                    _date = Utc::now() + Duration::hours(1);
+                    let my_claims = Claims {
+                        sub: user.email,
+                        user_id: x.user_id,
+                        exp: _date.timestamp() as usize,
+                    };
+                    let token = encode(
+                        &Header::default(),
+                        &my_claims,
+                        &EncodingKey::from_secret(key),
+                    )
+                    .unwrap();
+                    Ok(LoginResponse {
+                        success: true,
+                        token,
+                        message: LOGIN_SUCCESS.to_string(),
+                    })
+                } else {
+                    Err(Response {
+                        success: false,
+                        message: LOGIN_FAIL.to_string(),
+                    })
+                }
+            }
+            None => Err(Response {
+                success: false,
+                message: LOGIN_FAIL.to_string(),
+            }),
+        }
+    }
     fn register(&self, user: Register) -> Result<LoginResponse, Response> {
         let _email_exist = self
             .find_user_with_email((&user.email).parse().unwrap())
@@ -136,7 +131,7 @@ impl IUserRepository for UserRepository {
                         sha.input_str(user.password.as_str());
                         let hash_pw = sha.result_str();
                         let user_id = uuid::Uuid::new_v4().to_string();
-                        let _ex = db.collection(collection_name.as_str()).insert_one(doc! {"user_id": user_id.clone(), "name": user.fullname, "username": user.username, "email": user.email.clone(), "password": hash_pw}, None);
+                        let _ex = db.collection(collection_name.as_str()).insert_one(doc! {"user_id": user_id.clone(), "fullname": user.fullname, "username": user.username, "email": user.email.clone(), "password": hash_pw}, None);
                         match _ex {
                             Ok(_) => {
                                 let _config: Config = Config {};
