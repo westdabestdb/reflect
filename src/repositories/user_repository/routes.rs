@@ -41,17 +41,22 @@ async fn login(user: web::Json<Login>) -> HttpResponse {
 
 #[get("/me")]
 async fn me(_req: HttpRequest) -> HttpResponse {
-  let _auth = _req.headers().get("Authorization");
-  let _split: Vec<&str> = _auth.unwrap().to_str().unwrap().split("Bearer").collect();
-  let token = _split[1].trim();
+  let token = get_token(_req);
   let _connection: Connection = Connection {};
   let _repository: UserRepository = UserRepository {
     connection: _connection.init(),
   };
-  match _repository.me(token) {
+  match _repository.me(&token) {
     Ok(result) => HttpResponse::Ok().json(result.unwrap()),
     Err(err) => HttpResponse::Ok().json(err),
   }
+}
+
+fn get_token(_req: HttpRequest) -> String {
+  let _auth = _req.headers().get("Authorization");
+  let _split: Vec<&str> = _auth.unwrap().to_str().unwrap().split("Bearer").collect();
+  let token = _split[1].trim();
+  token.to_owned()
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
