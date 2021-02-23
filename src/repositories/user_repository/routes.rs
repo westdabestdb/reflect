@@ -52,6 +52,20 @@ async fn me(_req: HttpRequest) -> HttpResponse {
   }
 }
 
+#[post("/me/update")]
+async fn me_update(_req: HttpRequest) -> HttpResponse {
+  println!("fuck");
+  let token = get_token(_req);
+  let _connection: Connection = Connection {};
+  let _repository: UserRepository = UserRepository {
+    connection: _connection.init(),
+  };
+  match _repository.me_update(&token) {
+    Ok(result) => HttpResponse::Ok().json(result),
+    Err(err) => HttpResponse::Ok().json(err),
+  }
+}
+
 fn get_token(_req: HttpRequest) -> String {
   let _auth = _req.headers().get("Authorization");
   let _split: Vec<&str> = _auth.unwrap().to_str().unwrap().split("Bearer").collect();
@@ -64,4 +78,5 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
   cfg.service(register);
   cfg.service(login);
   cfg.service(me);
+  cfg.service(me_update);
 }
