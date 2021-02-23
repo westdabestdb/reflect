@@ -1,6 +1,6 @@
 use crate::config::strings::{
     EMAIL_EXIST, INVALID_TOKEN, LOGIN_FAIL, LOGIN_SUCCESS, REGISTRATION_FAIL, REGISTRATION_SUCCESS,
-    SOMETHING_WRONG, USERNAME_EXIST,UPDATED
+    SOMETHING_WRONG, UPDATED, USERNAME_EXIST,
 };
 use crate::config::{Config, IConfig};
 use crate::models::response::{LoginResponse, Response};
@@ -216,13 +216,11 @@ impl IUserRepository for UserRepository {
                 let database_name = _config.get_config_with_key("DATABASE_NAME");
                 let collection_name = _config.get_config_with_key("USER_COLLECTION_NAME");
                 let db = self.connection.database(database_name.as_str());
-                let cursor = db
-                    .collection(collection_name.as_str())
-                    .update_one(
-                        doc! {"email": decoded.claims.sub.to_string()},
-                        doc! {"email": ""},
-                        None,
-                    );
+                let cursor = db.collection(collection_name.as_str()).update_one(
+                    doc! {"email": decoded.claims.sub.to_string()},
+                    doc! {"email": ""},
+                    None,
+                );
                 match cursor {
                     Ok(_) => Ok(Response {
                         success: true,

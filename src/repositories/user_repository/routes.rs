@@ -54,7 +54,6 @@ async fn me(_req: HttpRequest) -> HttpResponse {
 
 #[post("/me/update")]
 async fn me_update(_req: HttpRequest) -> HttpResponse {
-  println!("fuck");
   let token = get_token(_req);
   let _connection: Connection = Connection {};
   let _repository: UserRepository = UserRepository {
