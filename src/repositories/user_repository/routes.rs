@@ -1,5 +1,5 @@
 use crate::db::db::{Connection, IConnection};
-use crate::models::user::{Login, Register};
+use crate::models::user::{Login, Register, UpdateMe};
 use crate::repositories::user_repository::{IUserRepository, UserRepository};
 use actix_web::http::StatusCode;
 use actix_web::{get, post, web, HttpRequest, HttpResponse};
@@ -53,13 +53,13 @@ async fn me(_req: HttpRequest) -> HttpResponse {
 }
 
 #[post("/me/update")]
-async fn me_update(_req: HttpRequest) -> HttpResponse {
+async fn me_update(_req: HttpRequest, data: web::Json<UpdateMe>) -> HttpResponse {
   let token = get_token(_req);
   let _connection: Connection = Connection {};
   let _repository: UserRepository = UserRepository {
     connection: _connection.init(),
   };
-  match _repository.me_update(&token) {
+  match _repository.me_update(&token, &data.field, &data.value) {
     Ok(result) => HttpResponse::Ok().json(result),
     Err(err) => HttpResponse::Ok().json(err),
   }

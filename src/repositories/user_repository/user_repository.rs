@@ -18,7 +18,7 @@ pub trait IUserRepository {
     fn login(&self, login: Login) -> Result<LoginResponse, Response>;
     fn register(&self, user: Register) -> Result<LoginResponse, Response>;
     fn me(&self, token: &str) -> Result<Option<User>, Response>;
-    fn me_update(&self, token: &str) -> Result<Response, Response>;
+    fn me_update(&self, token: &str, field: &str, value: &str) -> Result<Response, Response>;
     fn protected_function(&self) -> bool;
 }
 
@@ -202,7 +202,7 @@ impl IUserRepository for UserRepository {
         }
     }
 
-    fn me_update(&self, token: &str) -> Result<Response, Response> {
+    fn me_update(&self, token: &str, field: &str, value: &str) -> Result<Response, Response> {
         let _config: Config = Config {};
         let _var = _config.get_config_with_key("SECRET_KEY");
         let key = _var.as_bytes();
@@ -217,8 +217,10 @@ impl IUserRepository for UserRepository {
                 let collection_name = _config.get_config_with_key("USER_COLLECTION_NAME");
                 let db = self.connection.database(database_name.as_str());
                 let cursor = db.collection(collection_name.as_str()).update_one(
-                    doc! {"email": decoded.claims.sub.to_string()},
-                    doc! {"email": ""},
+                    doc! {"user_id": decoded.claims.user_id.to_string()},
+                    doc! {
+                        "$set": {field: value}
+                    },
                     None,
                 );
                 match cursor {
